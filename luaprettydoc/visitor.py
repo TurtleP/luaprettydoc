@@ -1,12 +1,13 @@
 import re
 from enum import Enum
 
+import yaml
 from luaparser.ast import ASTVisitor
-from luaparser.astnodes import Invoke, Name, Varargs
+from luaparser.astnodes import Comment, Invoke, Name, Node, Varargs
 
 
 class CommentItem(str, Enum):
-    COMMENT_FILE = "@file"
+    COMMENT_FILE = "@module"
     COMMENT_BRIEF = "@brief"
     COMMENT_PARAM = "@param"
     COMMENT_RETURN = "@return"
@@ -17,49 +18,73 @@ class Visitor(ASTVisitor):
 
     def __init__(self) -> None:
         super().__init__()
-
-        self.last_method = None
         self.items = list()
 
+    def is_empty(self) -> bool:
+        return len(self.items) == 0
+
+    def get_items(self) -> list:
+        return self.items
+
+    def has_metadata(self) -> bool:
+        for item in self.items:
+            if "metadata" in item:
+                return True
+
+        return False
+
+    def get_metadata(self) -> dict | None:
+        for item in self.items:
+            if "metadata" in item:
+                return item["metadata"]
+
+        return None
+
+    def dump_data(self) -> str:
+        return yaml.dump(self.items)
+
     def handle_comment_buffer(self, comment_line) -> str | None:
-        __match = None
         for comment_type in CommentItem:
             __pattern = rf"{comment_type.value}\s(.+)"
             __match = re.search(__pattern, comment_line)
 
             if __match:
-                break
+                return __match.group(0)
 
-        if __match:
-            return __match.group(0)
+        return None
+
+    def get_comment_buffer(self, node: Node) -> list:
+        __result = list()
+
+        if isinstance(node, Comment):
+            if node.is_multi_line:
+                __lines = node.s.split("\n")
+
+                for line in __lines:
+                    __data = self.handle_comment_buffer(line)
+
+                    if __data:
+                        __result.append(__data)
+
+        return __result
 
     def visit_Comment(self, node):
-        if node.is_multi_line:
-            __comment_line = node.s.split("\n")
-            __comment_data = list()
+        """If it's a global comment, check if it's metadata"""
+        __comments = self.get_comment_buffer(node)
 
-            for line in __comment_line:
-                __data = self.handle_comment_buffer(line)
-
-                if __data:
-                    __comment_data.append(__data)
-
-            if self.last_method is not None and len(__comment_data) > 0:
-                __metadata = {"comments": __comment_data}
-                if CommentItem.COMMENT_FILE in __comment_data[0]:
-                    self.items.append({"metdata": __metadata})
-                else:
-                    dict.update(self.items[self.last_method], __metadata)
-
-    def is_empty(self) -> bool:
-        return len(self.items) == 0
-
-    def get_items(self):
-        return self.items
+        if len(__comments) > 0:
+            if CommentItem.COMMENT_FILE in __comments[0]:
+                return self.items.append({"metadata": __comments})
 
     def visit_Method(self, node):
+        """Methods can have comments outside! Use this!"""
         __source = node.source.id
         __method = node.name.id
+        __comments = list()
+
+        if node.comments:
+            for comment in node.comments:
+                __comments = self.get_comment_buffer(comment)
 
         __args = list()
         for element in node.args:
@@ -69,7 +94,8 @@ class Visitor(ASTVisitor):
                 __args.append("...")
 
         __metadata = {"source": f"{__source}",
-                      "name": f"{__method}", "args": str(__args), "comments": None}
+                      "name": f"{__method}", "args": str(__args),
+                      "comments": __comments}
 
         self.last_method = len(self.items)
         self.items.append(__metadata)

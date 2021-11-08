@@ -21,7 +21,7 @@ def main(commandline: list = None):
 
     Path("docs").mkdir(exist_ok=True)
     for tree_iter in __scan_dir.rglob("*.lua"):
-        _ = LuaFile(tree_iter).export()
+        _ = LuaFile(tree_iter, True).export()
 
 
 if __name__ == "__main__":

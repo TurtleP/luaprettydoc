@@ -13,9 +13,9 @@ class LuaFile:
     DocFilePath = "docs"
 
     # File header
-    FileHeader = "## {} File Reference,"
+    FileHeader = "## Module"
 
-    def __init__(self, filepath: Path):
+    def __init__(self, filepath: Path, debug: bool = False):
         print(f"Parsing {filepath.name}..")
 
         __tree_info = None
@@ -23,29 +23,38 @@ class LuaFile:
             __tree_info = ast.parse(file.read())
 
         self.filepath = filepath
-        self.buffer = LuaFile.FileHeader.format(filepath.name)
 
         # Visit Comments, Methods, Functions, and Local Functions
         visitor = Visitor()
         visitor.visit(__tree_info)
 
+        # Handle the data
+        __header_ref = filepath.name
+        if visitor.has_metadata():
+            __metadata = visitor.get_metadata()
+
+            __header_ref = __metadata[0]
+
+        self.buffer = f"{LuaFile.FileHeader} {__header_ref}"
+
         self.output = True
         if visitor.is_empty():
             self.output = False
+        else:
+            if debug:
+                self.debug_export(visitor, filepath)
 
-        if self.output:
-            _printer = pprint.PrettyPrinter(indent=4)
-            _printer.pprint(visitor.get_items())
+        __filename = filepath.with_suffix("").name
+        self.outname = f"{LuaFile.DocFilePath}/{__filename}.md"
 
-        # self.buffer += str(visitor.get_buffer())
-
-    def fetch_file_summary(self, node: Node):
-        print(node)
+    def debug_export(self, visitor, filepath):
+        Path("docs/test").mkdir(exist_ok=True)
+        with open(f"docs/test/{filepath.stem}.yaml", "w") as file:
+            file.write(visitor.dump_data())
 
     def export(self):
         if not self.output:
             return
 
-        __filename = f"{LuaFile.DocFilePath}/{self.filepath.stem}.md"
-        # with open(__filename, "w") as file:
-        #     file.write(self.buffer)
+        with open(self.outname, "w") as file:
+            file.write(self.buffer)

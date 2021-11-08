@@ -1,0 +1,14 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "[markdown]": {
+      "editor.wordWrap": "on",
+      "editor.quickSuggestions": false,
+      "files.trimTrailingWhitespace": false
+    }
+  }
+}
