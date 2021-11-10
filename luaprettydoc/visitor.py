@@ -3,7 +3,7 @@ from enum import Enum
 
 import yaml
 from luaparser.ast import ASTVisitor
-from luaparser.astnodes import Comment, Invoke, Name, Node, Varargs
+from luaparser.astnodes import Comment, Index, Invoke, Name, Node, Varargs
 
 
 class CommentItem(str, Enum):
@@ -78,40 +78,89 @@ class Visitor(ASTVisitor):
 
     def visit_Comment(self, node):
         """If it's a global comment, check if it's metadata"""
+
         __comments = self.get_comment_buffer(node)
 
         if len(__comments) > 0:
             if CommentItem.COMMENT_FILE in __comments[0]:
                 return self.items.append({"metadata": __comments})
 
-    def visit_Method(self, node):
-        """Methods can have comments outside! Use this!"""
-        __source = node.source.id
-        __method = node.name.id
+    def get_comments(self, node: Node) -> list:
         __comments = list()
-
         if node.comments:
             for comment in node.comments:
                 __comments = self.get_comment_buffer(comment)
 
-        __args = list()
+        return __comments
+
+    def get_arguments(self, node: Node) -> list:
+        __arguments = list()
+
         for element in node.args:
             if isinstance(element, Name):
-                __args.append(element.id)
+                __arguments.append(element.id)
             elif isinstance(element, Varargs):
-                __args.append("...")
+                __arguments.append("...")
 
-        __metadata = {"source": f"{__source}",
-                      "name": f"{__method}", "args": __args,
-                      "comments": __comments}
+        return __arguments
 
-        self.last_method = len(self.items)
+    def visit_Method(self, node):
+        """Called when the Visitor visits a Method (`function source:name(args) ... end`)"""
+
+        __source = node.source.id
+        __method = node.name.id
+
+        __comments = self.get_comments(node)
+        __arguments = self.get_arguments(node)
+
+        __metadata = {"source": __source,
+                      "name": __method, "args": __arguments,
+                      "comments": __comments, "notation": ":"}
+
         self.items.append(__metadata)
 
     def visit_Function(self, node):
-        # print(node.name)
-        pass
+        """Called when the Visitor visits a Function (`function name(args) ... end`)"""
+
+        __source, __name = "", None
+        __arguments, __comments = None, None
+        __notation = ""
+
+        if isinstance(node.name, Name):
+            __name = node.name.id
+        elif isinstance(node.name, Index):
+            __name = node.name.idx.id
+            __source = node.name.value.id
+            __notation = "."
+
+        __comments = self.get_comments(node)
+        __arguments = self.get_arguments(node)
+
+        __metadata = {"source": __source,
+                      "name": __name, "args": __arguments,
+                      "comments": __comments, "notation": __notation}
+
+        self.items.append(__metadata)
 
     def visit_LocalFunction(self, node):
-        # print(node.name, node.args)
-        pass
+        """Called when the Visitor visits a Function (`local function name(args) ... end`)"""
+
+        __source, __name = "", None
+        __arguments, __comments = None, None
+        __notation = ""
+
+        if isinstance(node.name, Name):
+            __name = node.name.id
+        elif isinstance(node.name, Index):
+            __name = node.name.idx.id
+            __source = node.name.value.id
+            __notation = "."
+
+        __comments = self.get_comments(node)
+        __arguments = self.get_arguments(node)
+
+        __metadata = {"source": __source,
+                      "name": __name, "args": __arguments,
+                      "comments": __comments, "notation": __notation}
+
+        self.items.append(__metadata)

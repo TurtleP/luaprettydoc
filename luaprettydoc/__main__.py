@@ -1,9 +1,10 @@
-import shutil
 import sys
 from argparse import ArgumentParser
+from datetime import datetime
 from os import mkdir
 from pathlib import Path
 
+from . import __version__
 from .luafile import LuaFile
 
 
@@ -14,7 +15,6 @@ def main(commandline: list = None):
     parser = ArgumentParser("luaprettydoc")
 
     parser.add_argument("scan_dir", type=str, help="root directory to scan")
-    parser.add_argument("--clean", type=bool, help="clean the docs directory")
 
     parsed_args = parser.parse_args()
 
@@ -22,7 +22,8 @@ def main(commandline: list = None):
     (__scan_dir / "docs").mkdir(exist_ok=True)
 
     for tree_iter in __scan_dir.rglob("*.lua"):
-        _ = LuaFile(tree_iter, True).export()
+        _ = LuaFile(tree_iter, True).export(
+            __version__, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 
 if __name__ == "__main__":

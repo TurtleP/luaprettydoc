@@ -40,7 +40,7 @@ setup(
     description=__package_info["description"],
     long_description=__package_info["readme"],
     long_description_content_type='text/markdown',
-    install_requires=["toml"],
+    install_requires=["toml", "pyyaml"],
     packages=find_packages(),
     package_data={"data": ["*"]},
     entry_points={'console_scripts': [
