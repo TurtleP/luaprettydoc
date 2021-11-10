@@ -1,5 +1,6 @@
 import shutil
 import sys
+from argparse import ArgumentParser
 from os import mkdir
 from pathlib import Path
 
@@ -10,19 +11,19 @@ from .luafile import LuaFile
 # to set up the cwd as the path
 # otherwise, use the provided one
 def main(commandline: list = None):
-    __scan_dir = None
-    if len(commandline) == 1:
-        if Path("docs").exists() and commandline[0] == "clean":
-            return shutil.rmtree("docs")
+    parser = ArgumentParser("luaprettydoc")
 
-        __scan_dir = Path(commandline[0]).resolve()
-    else:
-        __scan_dir = Path().cwd()
+    parser.add_argument("scan_dir", type=str, help="root directory to scan")
+    parser.add_argument("--clean", type=bool, help="clean the docs directory")
 
-    Path("docs").mkdir(exist_ok=True)
+    parsed_args = parser.parse_args()
+
+    __scan_dir = Path(parsed_args.scan_dir)
+    (__scan_dir / "docs").mkdir(exist_ok=True)
+
     for tree_iter in __scan_dir.rglob("*.lua"):
         _ = LuaFile(tree_iter, True).export()
 
 
 if __name__ == "__main__":
-    main(sys.argv[-1:])
+    main(sys.argv)

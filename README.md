@@ -8,8 +8,8 @@ To document a function, simply make a multiline comment with one (or more) of th
 
 | Tag       | Description                          | Notes                                                              |
 |-----------|--------------------------------------|--------------------------------------------------------------------|
-| `@module` | Name of the module                   | Typically created at the top of the file. Otherwise, uses filename |
+| `@module` | Name of the module                   | Typically created at the top of the file. Otherwise, uses filename. |
 | `@brief` | Short description                    |                                                                    |
-| `@param` | Parameter type and description       |                                                                    |
+| `@param` | Parameter type and description       | Adding `?` at the end of the type denotes it is optional.           |
 | `@note` | Any special notes about the function |                                                                    |
 | `@return` | Return type and description          |                                                                    |
