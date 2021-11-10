@@ -2,14 +2,20 @@
 
 This is a python program that will parse Lua file comments and output them into a nice markdown file.
 
-### Documentation Formats
+### Installation
+
+Run `pip install -U git+git://github.com/TurtleP/luaprettydoc.git`
+
+> Note: On Linux, you may need to run as `sudo` . Some systems use `pip3` instead, so you might need to use that instead.
+
+### Documentation Tags
 
 To document a function, simply make a multiline comment with one (or more) of the following Tags.
 
-| Tag       | Description                          | Notes                                                              |
-|-----------|--------------------------------------|--------------------------------------------------------------------|
+| Tag       | Description                          | Notes                                                               |
+|-----------|--------------------------------------|---------------------------------------------------------------------|
 | `@module` | Name of the module                   | Typically created at the top of the file. Otherwise, uses filename. |
-| `@brief` | Short description                    |                                                                    |
-| `@param` | Parameter type and description       | Adding `?` at the end of the type denotes it is optional.           |
-| `@note` | Any special notes about the function |                                                                    |
-| `@return` | Return type and description          |                                                                    |
+| `@brief` | Short description                    |                                                                     |
+| `@param` | Parameter type and description       |                                                                     |
+| `@note` | Any special notes about the function |                                                                     |
+| `@return` | Return type and description          |                                                                     |
