@@ -21,9 +21,10 @@ end
 --[[
 - @brief Gets milk from the store. Except it's all soup. You went to the soup store.
 - @param `self` The `m_test` module table.
+- @return `string` "Soup"
 --]]
 function m_test.get_milk(self)
-
+    return "soup"
 end
 
 -- Function Test(s)
