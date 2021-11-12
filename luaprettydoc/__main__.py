@@ -1,5 +1,4 @@
 import sys
-from argparse import ArgumentParser
 from datetime import datetime
 from os import mkdir
 from pathlib import Path
@@ -11,19 +10,26 @@ from .luafile import LuaFile
 # If there's no args, we want
 # to set up the cwd as the path
 # otherwise, use the provided one
-def main(commandline: list = None):
-    parser = ArgumentParser("luaprettydoc")
+def main(_: list = None):
+    # Directory stuff
+    __scan_dir = Path().cwd()
 
-    parser.add_argument("scan_dir", type=str, help="root directory to scan")
+    __docs_dir = (__scan_dir / "docs")
+    __docs_dir.mkdir(exist_ok=True)
 
-    parsed_args = parser.parse_args()
+    # Documentation output
+    __output_dir = __docs_dir
 
-    __scan_dir = Path(parsed_args.scan_dir)
-    (__scan_dir / "docs").mkdir(exist_ok=True)
+    # Compilation date and time
+    __date_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     for tree_iter in __scan_dir.rglob("*.lua"):
-        _ = LuaFile(tree_iter, True).export(
-            __version__, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        if tree_iter.parent != __scan_dir:
+            __output_dir = (__docs_dir / tree_iter.parent.stem)
+            if not __output_dir.exists():
+                __output_dir.mkdir(exist_ok=True)
+
+        _ = LuaFile(__output_dir, tree_iter).export(__version__, __date_time)
 
 
 if __name__ == "__main__":
