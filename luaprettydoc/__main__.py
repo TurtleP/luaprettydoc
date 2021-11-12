@@ -1,4 +1,5 @@
 import sys
+from argparse import ArgumentParser
 from datetime import datetime
 from os import mkdir
 from pathlib import Path
@@ -11,6 +12,17 @@ from .luafile import LuaFile
 # to set up the cwd as the path
 # otherwise, use the provided one
 def main(_: list = None):
+    __parser = ArgumentParser("luaprettydoc", "Lua Documentation to Markdown")
+
+    __parser.add_argument(
+        "--version", action='version', version='%(prog)s 2.0')
+
+    __parser.parse_args()
+
+    # Return early if we want only version info
+    if hasattr(__parser, "version"):
+        return
+
     # Directory stuff
     __scan_dir = Path().cwd()
 
