@@ -15,7 +15,7 @@ def main(_: list = None):
     __parser = ArgumentParser("luaprettydoc", "Lua Documentation to Markdown")
 
     __parser.add_argument(
-        "--version", action='version', version='%(prog)s 2.0')
+        "--version", action='version', version='%(prog)s {}'.format(__version__))
 
     __parser.parse_args()
 
