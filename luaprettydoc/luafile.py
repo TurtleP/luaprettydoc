@@ -82,6 +82,7 @@ class LuaFile:
 
         __args = ", ".join(data["args"])
 
+        __call = None
         __brief, __params = None, ""
         __notes, __returns = list(), ""
 
@@ -96,13 +97,20 @@ class LuaFile:
                 __returns += self.handle_parameter_returns(comment)
             elif CommentTag.COMMENT_TAG_NOTE in comment:
                 __notes.append(self.handle_note(comment))
+            elif CommentTag.COMMENT_TAG_DEFINE in comment:
+                if __call is None:
+                    __call = Templates.TEMPLATE_DEFINE.format(
+                        get_tag_line(comment, 1))
             elif CommentTagSingle.COMMENT_TAG_SINGLE_EXCLUDE in comment:
                 __generate_function = False
 
         if __generate_function:
-            self.buffer += Templates.TEMPLATE_DEFINE.format(
-                source=data["source"], index=data["notation"],
-                name=data["name"], args=__args)
+            if __call is None:
+                __call = Templates.TEMPLATE_FUNC.format(
+                    source=data["source"], index=data["notation"],
+                    name=data["name"], args=__args)
+
+            self.buffer += __call
 
             if __brief is None:
                 __brief = "No description available."
@@ -118,6 +126,8 @@ class LuaFile:
             if __notes:
                 __notes_joined = " ".join(__notes)
                 self.buffer += Templates.TEMPLATE_NOTES.format(__notes_joined)
+
+            self.buffer += Templates.TEMPLATE_ENDING
 
     def debug_export(self, visitor: Visitor, filepath: Path) -> None:
         """Exports the Lua File to YAML for debug purposes"""

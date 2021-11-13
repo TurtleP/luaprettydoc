@@ -9,8 +9,8 @@ class CommentTag(str, Enum):
     COMMENT_TAG_FILE = "@module"
     """{@module} Module/Header name (default: filename)"""
 
-    COMMENT_TAG_DEFINE = "@define"
-    """{@define} Definition override"""
+    COMMENT_TAG_DEFINE = "@definition"
+    """{@definition} Definition override"""
 
     COMMENT_TAG_BRIEF = "@brief"
     """{@brief} Short description (default: 'No description available.')"""

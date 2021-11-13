@@ -14,11 +14,12 @@ Run `pip install -U git+git://github.com/TurtleP/luaprettydoc.git`
 
 To document a function, simply make a multiline comment with one (or more) of the following Tags.
 
-| Tag       | Description                          | Notes                                                               |
-|-----------|--------------------------------------|---------------------------------------------------------------------|
-| `@module` | Name of the module                   | Typically created at the top of the file. Otherwise, uses filename. |
-| `@brief` | Short description                    |                                                                     |
-| `@param` | Parameter type and description       |                                                                     |
-| `@note` | Any special notes about the function |                                                                     |
-| `@return` | Return type and description          |                                                                     |
-| `@exclude` | Exclude the function from markdown output ||
+| Tag           | Description                               | Notes                                                               |
+|---------------|-------------------------------------------|---------------------------------------------------------------------|
+| `@module` | Name of the module                        | Typically created at the top of the file. Otherwise, uses filename. |
+| `@brief` | Short description                         |                                                                     |
+| `@param` | Parameter type and description            |                                                                     |
+| `@note` | Any special notes about the function      |                                                                     |
+| `@return` | Return type and description               |                                                                     |
+| `@exclude` | Exclude the function from markdown output |                                                                     |
+| `@definition` | Override the default function definition  |                                                                     |
