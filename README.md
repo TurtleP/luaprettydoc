@@ -21,3 +21,4 @@ To document a function, simply make a multiline comment with one (or more) of th
 | `@param` | Parameter type and description       |                                                                     |
 | `@note` | Any special notes about the function |                                                                     |
 | `@return` | Return type and description          |                                                                     |
+| `@exclude` | Exclude the function from markdown output ||
