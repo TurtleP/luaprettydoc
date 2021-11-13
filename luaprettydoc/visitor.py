@@ -1,17 +1,10 @@
 import re
-from enum import Enum
 
 import yaml
 from luaparser.ast import ASTVisitor
 from luaparser.astnodes import Comment, Index, Invoke, Name, Node, Varargs
 
-
-class CommentItem(str, Enum):
-    COMMENT_FILE = "@module"
-    COMMENT_BRIEF = "@brief"
-    COMMENT_PARAM = "@param"
-    COMMENT_RETURN = "@return"
-    COMMENT_NOTE = "@note"
+from .tags import CommentTag
 
 
 class Visitor(ASTVisitor):
@@ -51,28 +44,19 @@ class Visitor(ASTVisitor):
     def dump_data(self) -> str:
         return yaml.dump(self.items)
 
-    def handle_comment_buffer(self, comment_line: str) -> str | None:
-        for comment_type in CommentItem:
-            __pattern = rf"{comment_type.value}\s(.+)"
-            __match = re.search(__pattern, comment_line)
-
-            if __match:
-                return __match.group(0)
-
-        return None
-
     def get_comment_buffer(self, node: Node) -> list:
         __result = list()
+        __lines = list()
 
         if isinstance(node, Comment):
             if node.is_multi_line:
                 __lines = node.s.split("\n")
 
-                for line in __lines:
-                    __data = self.handle_comment_buffer(line)
+        for line in __lines:
+            __data = CommentTag.get_tag_line(line)
 
-                    if __data:
-                        __result.append(__data)
+            if __data:
+                __result.append(__data)
 
         return __result
 
@@ -82,7 +66,7 @@ class Visitor(ASTVisitor):
         __comments = self.get_comment_buffer(node)
 
         if len(__comments) > 0:
-            if CommentItem.COMMENT_FILE in __comments[0]:
+            if CommentTag.COMMENT_TAG_FILE in __comments[0]:
                 return self.items.append({"metadata": __comments})
 
     def get_comments(self, node: Node) -> list:

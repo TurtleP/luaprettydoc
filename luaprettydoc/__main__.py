@@ -41,7 +41,8 @@ def main(_: list = None):
             if not __output_dir.exists():
                 __output_dir.mkdir(exist_ok=True)
 
-        _ = LuaFile(__output_dir, tree_iter).export(__version__, __date_time)
+        _ = LuaFile(__output_dir, tree_iter, True).export(
+            __version__, __date_time)
 
 
 if __name__ == "__main__":
