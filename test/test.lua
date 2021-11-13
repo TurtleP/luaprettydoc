@@ -27,11 +27,30 @@ function m_test.get_milk(self)
     return "soup"
 end
 
+--[[
+- @brief Prepares something.
+- @note Here's some mental notes for myself.
+- @exclude
+--]]
+function m_test:prepare()
+
+end
+
+--[[
+- @brief
+- @note
+--]]
+function m_test:async()
+
+end
+
 -- Function Test(s)
 
 function hello_world()
     print("Hello World!")
 end
+
+-- local functions do not get documented
 
 local function yeet()
     print("Delete")

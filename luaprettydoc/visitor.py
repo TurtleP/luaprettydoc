@@ -4,7 +4,7 @@ import yaml
 from luaparser.ast import ASTVisitor
 from luaparser.astnodes import Comment, Index, Invoke, Name, Node, Varargs
 
-from .tags import CommentTag
+from .tags import CommentTag, get_tag_line
 
 
 class Visitor(ASTVisitor):
@@ -22,7 +22,7 @@ class Visitor(ASTVisitor):
     def get_metadata(self) -> list | None:
         for item in self.items:
             if "metadata" in item:
-                return Visitor.prepare_data(item["metadata"])
+                return item["metadata"]
 
         return None
 
@@ -33,10 +33,6 @@ class Visitor(ASTVisitor):
                 __functions.append(item)
 
         return __functions
-
-    @staticmethod
-    def prepare_data(data: list) -> list:
-        return [re.sub(r"\s+", "", x, 1) for x in data]
 
     def has_metadata(self) -> bool:
         return self.get_metadata() is not None
@@ -53,7 +49,7 @@ class Visitor(ASTVisitor):
                 __lines = node.s.split("\n")
 
         for line in __lines:
-            __data = CommentTag.get_tag_line(line)
+            __data = get_tag_line(line)
 
             if __data:
                 __result.append(__data)
@@ -89,7 +85,8 @@ class Visitor(ASTVisitor):
         return __arguments
 
     def visit_Method(self, node):
-        """Called when the Visitor visits a Method (`function source:name(args) ... end`)"""
+        """Called when the Visitor visits a Method\n
+        (`function source:name(args) ... end`)"""
 
         __source = node.source.id
         __method = node.name.id
@@ -104,30 +101,8 @@ class Visitor(ASTVisitor):
         self.items.append(__metadata)
 
     def visit_Function(self, node):
-        """Called when the Visitor visits a Function (`function name(args) ... end`)"""
-
-        __source, __name = "", None
-        __arguments, __comments = None, None
-        __notation = ""
-
-        if isinstance(node.name, Name):
-            __name = node.name.id
-        elif isinstance(node.name, Index):
-            __name = node.name.idx.id
-            __source = node.name.value.id
-            __notation = "."
-
-        __comments = self.get_comments(node)
-        __arguments = self.get_arguments(node)
-
-        __metadata = {"source": __source,
-                      "name": __name, "args": __arguments,
-                      "comments": __comments, "notation": __notation}
-
-        self.items.append(__metadata)
-
-    def visit_LocalFunction(self, node):
-        """Called when the Visitor visits a Function (`local function name(args) ... end`)"""
+        """Called when the Visitor visits a Function\n
+        (`function name(args) ... end`)"""
 
         __source, __name = "", None
         __arguments, __comments = None, None

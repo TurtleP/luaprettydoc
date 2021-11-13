@@ -2,7 +2,7 @@ from pathlib import Path
 
 from luaparser import ast
 
-from .tags import CommentTag
+from .tags import CommentTag, CommentTagSingle, get_tag_line
 from .templates import Templates
 from .visitor import Visitor
 
@@ -36,8 +36,8 @@ class LuaFile:
         if visitor.has_metadata():
             __metadata = visitor.get_metadata()
 
-            self.module = CommentTag.get_tag_line(__metadata[0], 1)
-            self.module_brief = CommentTag.get_tag_line(__metadata[1], 1)
+            self.module = get_tag_line(__metadata[0], 1)
+            self.module_brief = get_tag_line(__metadata[1], 1)
 
         self.buffer = Templates.TEMPLATE_START.format(
             self.module, self.module_brief)
@@ -60,7 +60,7 @@ class LuaFile:
     def handle_parameter_returns(self, line: str) -> str:
         """Handle when we get a @param or @return tag"""
 
-        __param_return = CommentTag.get_tag_line(line, 1)
+        __param_return = get_tag_line(line, 1)
 
         if __param_return:
             return Templates.TEMPLATE_RETURN_PARAM.format(__param_return)
@@ -70,7 +70,7 @@ class LuaFile:
     def handle_note(self, line: str) -> str:
         """Handle when we get a @note tag"""
 
-        __note = CommentTag.get_tag_line(line, 1)
+        __note = get_tag_line(line, 1)
 
         if __note is not None:
             return __note
@@ -85,35 +85,39 @@ class LuaFile:
         __brief, __params = None, ""
         __notes, __returns = list(), ""
 
+        __generate_function = True
         for comment in data["comments"]:
             if CommentTag.COMMENT_TAG_BRIEF in comment:
                 if __brief is None:
-                    __brief = CommentTag.get_tag_line(comment, 1)
+                    __brief = get_tag_line(comment, 1)
             elif CommentTag.COMMENT_TAG_PARAM in comment:
                 __params += self.handle_parameter_returns(comment)
             elif CommentTag.COMMENT_TAG_RETURN in comment:
                 __returns += self.handle_parameter_returns(comment)
             elif CommentTag.COMMENT_TAG_NOTE in comment:
                 __notes.append(self.handle_note(comment))
+            elif CommentTagSingle.COMMENT_TAG_SINGLE_EXCLUDE in comment:
+                __generate_function = False
 
-        self.buffer += Templates.TEMPLATE_DEFINE.format(
-            source=data["source"], index=data["notation"],
-            name=data["name"], args=__args)
+        if __generate_function:
+            self.buffer += Templates.TEMPLATE_DEFINE.format(
+                source=data["source"], index=data["notation"],
+                name=data["name"], args=__args)
 
-        if __brief is None:
-            __brief = "No description available."
+            if __brief is None:
+                __brief = "No description available."
 
-        self.buffer += Templates.TEMPLATE_FUNC_BRIEF.format(__brief)
+            self.buffer += Templates.TEMPLATE_FUNC_BRIEF.format(__brief)
 
-        if __params:
-            self.buffer += Templates.TEMPLATE_PARAMS.format(__params)
+            if __params:
+                self.buffer += Templates.TEMPLATE_PARAMS.format(__params)
 
-        if __returns:
-            self.buffer += Templates.TEMPLATE_RETURNS.format(__returns)
+            if __returns:
+                self.buffer += Templates.TEMPLATE_RETURNS.format(__returns)
 
-        if __notes:
-            __notes_joined = " ".join(__notes)
-            self.buffer += Templates.TEMPLATE_NOTES.format(__notes_joined)
+            if __notes:
+                __notes_joined = " ".join(__notes)
+                self.buffer += Templates.TEMPLATE_NOTES.format(__notes_joined)
 
     def debug_export(self, visitor: Visitor, filepath: Path) -> None:
         """Exports the Lua File to YAML for debug purposes"""
