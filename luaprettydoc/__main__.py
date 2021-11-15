@@ -22,7 +22,7 @@ def main(_: list = None):
                           help="Only output files with proper header commentary")
 
     __parsed = __parser.parse_args()
-    print(__parsed)
+
     # Return early if we want only version info
     if hasattr(__parsed, "version"):
         return
