@@ -17,10 +17,14 @@ def main(_: list = None):
     __parser.add_argument(
         "--version", action='version', version='%(prog)s {}'.format(__version__))
 
-    __parser.parse_args()
+    __parser.add_argument("--headers",
+                          action="store_true", default=False,
+                          help="Only output files with proper header commentary")
 
+    __parsed = __parser.parse_args()
+    print(__parsed)
     # Return early if we want only version info
-    if hasattr(__parser, "version"):
+    if hasattr(__parsed, "version"):
         return
 
     # Directory stuff
@@ -38,11 +42,9 @@ def main(_: list = None):
     for tree_iter in __scan_dir.rglob("*.lua"):
         if tree_iter.parent != __scan_dir:
             __output_dir = (__docs_dir / tree_iter.parent.stem)
-            if not __output_dir.exists():
-                __output_dir.mkdir(exist_ok=True)
 
-        _ = LuaFile(__output_dir, tree_iter, True).export(
-            __version__, __date_time)
+        lua_file = LuaFile(__output_dir, tree_iter, __parsed.headers)
+        lua_file.export(__version__, __date_time)
 
 
 if __name__ == "__main__":
