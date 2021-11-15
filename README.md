@@ -4,7 +4,7 @@ This is a python program that will parse Lua file comments and output them into 
 
 ### Installation
 
-This is the standard way to install `luaprettydoc` . However, *stable* releases will be published/announced accordingly on the Releases page.
+This is the standard way to install `luaprettydoc` .
 
 Run `pip install -U git+git://github.com/TurtleP/luaprettydoc.git`
 
