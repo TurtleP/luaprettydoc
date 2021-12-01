@@ -1,5 +1,4 @@
 from pathlib import Path
-from types import ModuleType
 
 from luaparser import ast
 
@@ -21,6 +20,12 @@ class LuaFile:
                  headers_only: bool, debug: bool = False):
         """Scans a Lua file for parsing"""
 
+        __filename = filepath.with_suffix("").name
+        self.outname = f"{str(output_dir)}/{__filename}.md"
+
+        if not self.should_update_markdown(__filename, self.outname):
+            return
+
         __tree_info = None
         with open(filepath.resolve(), "r") as file:
             __tree_info = ast.parse(file.read())
@@ -39,23 +44,7 @@ class LuaFile:
 
         if visitor.has_metadata():
             __metadata = visitor.get_metadata()
-
-            module_type, module_name, module_brief = None, None, None
-
-            for metadata in __metadata:
-                if CommentTag.COMMENT_TAG_HEADER in metadata:
-                    module_type = get_tag_line(metadata, 1)
-                elif CommentTag.COMMENT_TAG_NAME in metadata:
-                    module_name = get_tag_line(metadata, 1) or filepath.name
-                elif CommentTag.COMMENT_TAG_BRIEF in metadata:
-                    module_brief = get_tag_line(metadata, 1)
-
-            if not self.is_metadata_valid(module_type):
-                module_type = MetadataType.METADATA_TYPE_MODULE
-
-            self.module = f"{module_type} {module_name}"
-            self.buffer = Templates.TEMPLATE_START.format(
-                self.module, module_brief)
+            self.create_metadata(__metadata, filepath.name)
         else:
             if headers_only:
                 self.output = False
@@ -69,19 +58,50 @@ class LuaFile:
         for function_info in __functions:
             self.create_function(function_info)
 
-        __filename = filepath.with_suffix("").name
-        self.outname = f"{str(output_dir)}/{__filename}.md"
-
         # Export info
         if self.output:
             output_dir.mkdir(parents=True, exist_ok=True)
 
+    def should_update_markdown(self, filepath: str, output: str) -> bool:
+        """Check if Markdown needs to be re-exported.
+        If it doesn't exist yet, return True"""
+
+        lua_file = Path(filepath).resolve()
+        markdown = Path(output).resolve()
+
+        if not markdown.exists():
+            return True
+
+        return lua_file.stat().st_mtime > markdown.stat().st_mtime
+
     def is_metadata_valid(self, type: str) -> bool:
+        """Check if the Metadata Type is 'Module' or 'Library'"""
+
         for item in MetadataType:
             if type == item.value:
                 return True
 
         return False
+
+    def create_metadata(self, meta: list, name: str) -> None:
+        """Create the Metadata for Markdown Output"""
+
+        module_type, module_name, module_brief = None, None, None
+
+        for metadata in meta:
+            if CommentTag.COMMENT_TAG_HEADER in metadata:
+                module_type = get_tag_line(metadata, 1)
+            elif CommentTag.COMMENT_TAG_NAME in metadata:
+                module_name = get_tag_line(metadata, 1) or name
+            elif CommentTag.COMMENT_TAG_BRIEF in metadata:
+                module_brief = get_tag_line(metadata, 1)
+
+        if not self.is_metadata_valid(module_type):
+            module_type = MetadataType.METADATA_TYPE_MODULE
+
+        self.module = f"{module_type} {module_name}"
+        self.buffer = Templates.TEMPLATE_START.format(
+            self.module, module_brief)
 
     def handle_parameter_returns(self, line: str) -> str:
         """Handle when we get a @param or @return tag"""

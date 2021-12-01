@@ -3,6 +3,8 @@ from enum import Enum
 
 
 class CommentTag(str, Enum):
+    """Comment Tag values @{specifier} with values."""
+
     COMMENT_TAG_HEADER = "@type"
     """{@type} Header config type (default: 'Module')"""
 
@@ -26,11 +28,15 @@ class CommentTag(str, Enum):
 
 
 class CommentTagSingle(str, Enum):
+    """Comment Tag values @{specifier} with not values"""
+
     COMMENT_TAG_SINGLE_EXCLUDE = "@exclude"
     """{@exclude} Excludes the function from being markdown'd"""
 
 
 class MetadataType(str, Enum):
+    """Types of Metadata for CommentTag::COMMENT_TAG_HEADER"""
+
     METADATA_TYPE_MODULE = "Module"
     """Metadata @type is Module"""
 

@@ -14,12 +14,18 @@ class Visitor(ASTVisitor):
         self.items = list()
 
     def is_empty(self) -> bool:
+        """Check if empty"""
+
         return len(self.items) == 0
 
     def get_items(self) -> list:
+        """Get the items"""
+
         return self.items
 
     def get_metadata(self) -> list | None:
+        """Get the metadata info"""
+
         for item in self.items:
             if "metadata" in item:
                 return item["metadata"]
@@ -27,6 +33,8 @@ class Visitor(ASTVisitor):
         return None
 
     def get_functions(self) -> list | None:
+        """Get all the functions"""
+
         __functions = list()
         for item in self.items:
             if "metadata" not in item:
@@ -35,12 +43,18 @@ class Visitor(ASTVisitor):
         return __functions
 
     def has_metadata(self) -> bool:
+        """Check if metadata exists"""
+
         return self.get_metadata() is not None
 
     def dump_data(self) -> str:
+        """DEBUG -> dump to YAML"""
+
         return yaml.dump(self.items)
 
     def get_comment_buffer(self, node: Node) -> list:
+        """Get comment data"""
+
         __result = list()
         __lines = list()
 
@@ -57,7 +71,7 @@ class Visitor(ASTVisitor):
         return __result
 
     def visit_Comment(self, node):
-        """If it's a global comment, check if it's metadata"""
+        """Visited a global comment"""
 
         __comments = self.get_comment_buffer(node)
 
@@ -66,6 +80,8 @@ class Visitor(ASTVisitor):
                 return self.items.append({"metadata": __comments})
 
     def get_comments(self, node: Node) -> list:
+        """Get the comments from a Node"""
+
         __comments = list()
         if node.comments:
             for comment in node.comments:
@@ -74,6 +90,8 @@ class Visitor(ASTVisitor):
         return __comments
 
     def get_arguments(self, node: Node) -> list:
+        """Get the arguments for a Method/Function"""
+
         __arguments = list()
 
         for element in node.args:
