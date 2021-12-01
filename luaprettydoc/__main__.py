@@ -16,19 +16,23 @@ def get_docs_dir() -> Path:
 
 
 def main(_: list = None):
-    __parser = ArgumentParser("luaprettydoc", "Lua Documentation to Markdown")
+    __parser = ArgumentParser(
+        "luaprettydoc", description="Lua Documentation to Markdown")
 
     __parser.add_argument(
         "--version", action='version', version='%(prog)s {}'.format(__version__))
 
     __parser.add_argument("--headers",
                           action="store_true", default=False,
-                          help="Only output files with proper header commentary")
+                          help="only output files with metadata")
 
     __group = __parser.add_mutually_exclusive_group()
 
-    __group.add_argument("--dir", "-d")
-    __group.add_argument("--file", "-f")
+    __group.add_argument(
+        "--dir", "-d", help="scan a directory recursively for output")
+
+    __group.add_argument(
+        "--file", "-f", help="output a specific lua file to markdown")
 
     __parsed = __parser.parse_args()
 
