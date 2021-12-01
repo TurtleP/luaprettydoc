@@ -3,11 +3,11 @@ from enum import Enum
 
 
 class CommentTag(str, Enum):
-    COMMENT_TAG_HEADER = "@header"
-    """{@header} Header config name (default: 'Module')"""
+    COMMENT_TAG_HEADER = "@type"
+    """{@type} Header config type (default: 'Module')"""
 
-    COMMENT_TAG_FILE = "@module"
-    """{@module} Module/Header name (default: filename)"""
+    COMMENT_TAG_NAME = "@name"
+    """{@name} Module/Header name (default: filename)"""
 
     COMMENT_TAG_DEFINE = "@definition"
     """{@definition} Definition override"""

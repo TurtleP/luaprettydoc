@@ -62,7 +62,7 @@ class Visitor(ASTVisitor):
         __comments = self.get_comment_buffer(node)
 
         if len(__comments) > 0:
-            if CommentTag.COMMENT_TAG_FILE in __comments[0]:
+            if CommentTag.COMMENT_TAG_HEADER in __comments[0] or CommentTag.COMMENT_TAG_NAME in __comments[0]:
                 return self.items.append({"metadata": __comments})
 
     def get_comments(self, node: Node) -> list:
