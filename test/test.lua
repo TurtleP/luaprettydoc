@@ -1,5 +1,6 @@
 --[[
-- @module Test
+- @type Library
+- @name Test
 - @brief This is a test file.
 --]]
 

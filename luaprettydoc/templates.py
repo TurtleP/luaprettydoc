@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class Templates(str, Enum):
-    TEMPLATE_START = ("# Module {}"
+    TEMPLATE_START = ("# {}"
                       "\n\n"
                       "_{}_"
                       "\n\n"

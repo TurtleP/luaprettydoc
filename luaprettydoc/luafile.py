@@ -1,8 +1,9 @@
 from pathlib import Path
+from types import ModuleType
 
 from luaparser import ast
 
-from .tags import CommentTag, CommentTagSingle, get_tag_line
+from .tags import CommentTag, CommentTagSingle, MetadataType, get_tag_line
 from .templates import Templates
 from .visitor import Visitor
 
@@ -34,15 +35,27 @@ class LuaFile:
         self.output = True
 
         # Handle the data
-
-        self.module = filepath.name
         self.module_brief = "No description available"
 
         if visitor.has_metadata():
             __metadata = visitor.get_metadata()
 
-            self.module = get_tag_line(__metadata[0], 1)
-            self.module_brief = get_tag_line(__metadata[1], 1)
+            module_type, module_name, module_brief = None, None, None
+
+            for metadata in __metadata:
+                if CommentTag.COMMENT_TAG_HEADER in metadata:
+                    module_type = get_tag_line(metadata, 1)
+                elif CommentTag.COMMENT_TAG_NAME in metadata:
+                    module_name = get_tag_line(metadata, 1) or filepath.name
+                elif CommentTag.COMMENT_TAG_BRIEF in metadata:
+                    module_brief = get_tag_line(metadata, 1)
+
+            if not self.is_metadata_valid(module_type):
+                module_type = MetadataType.METADATA_TYPE_MODULE
+
+            self.module = f"{module_type} {module_name}"
+            self.buffer = Templates.TEMPLATE_START.format(
+                self.module, module_brief)
         else:
             if headers_only:
                 self.output = False
@@ -51,9 +64,6 @@ class LuaFile:
             self.output = False
 
         # Generate the markdown
-
-        self.buffer = Templates.TEMPLATE_START.format(
-            self.module, self.module_brief)
 
         __functions = visitor.get_functions()
         for function_info in __functions:
@@ -65,6 +75,13 @@ class LuaFile:
         # Export info
         if self.output:
             output_dir.mkdir(parents=True, exist_ok=True)
+
+    def is_metadata_valid(self, type: str) -> bool:
+        for item in MetadataType:
+            if type == item.value:
+                return True
+
+        return False
 
     def handle_parameter_returns(self, line: str) -> str:
         """Handle when we get a @param or @return tag"""

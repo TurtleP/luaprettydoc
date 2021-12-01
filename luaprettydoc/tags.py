@@ -30,6 +30,17 @@ class CommentTagSingle(str, Enum):
     """{@exclude} Excludes the function from being markdown'd"""
 
 
+class MetadataType(str, Enum):
+    METADATA_TYPE_MODULE = "Module"
+    """Metadata @type is Module"""
+
+    METADATA_TYPE_LIBRARY = "Library"
+    """Metadata @type is Library"""
+
+    METDATA_TYPE_UNKNOWN = "Unknown"
+    """Metadata @type cannot be determined"""
+
+
 def get_tag_line(line: str, group_id: int = 0) -> str | None:
     """Get the line from the comment that matches the regex search.\n
     It's actually quite hilarious."""
